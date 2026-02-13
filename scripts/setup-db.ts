@@ -85,11 +85,26 @@ async function setup() {
   `);
   console.log(`  ${p("chat_messages")}`);
 
+  // 5. Custom lenses table
+  await sql.unsafe(`
+    CREATE TABLE IF NOT EXISTS "${p("custom_lenses")}" (
+      "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      "name" text NOT NULL,
+      "description" text NOT NULL,
+      "prompt" text NOT NULL,
+      "icon" text NOT NULL DEFAULT 'Sparkles',
+      "original_input" text NOT NULL,
+      "created_at" timestamp DEFAULT now() NOT NULL,
+      "updated_at" timestamp DEFAULT now() NOT NULL
+    )
+  `);
+  console.log(`  ${p("custom_lenses")}`);
+
   console.log("\nDone! All tables created.");
 
   if (prefix) {
     console.log(
-      `\nYour tables: ${p("projects")}, ${p("chat_conversations")}, ${p("chat_messages")}`,
+      `\nYour tables: ${p("projects")}, ${p("chat_conversations")}, ${p("chat_messages")}, ${p("custom_lenses")}`,
     );
     console.log("Shared table: users");
   }

@@ -185,3 +185,35 @@
 .prose pre {
   overflow-x: auto;
 }
+
+/* Lens badge styles */
+.lens-badge-active {
+  box-shadow: 0 0 8px oklch(0.6 0.18 250 / 0.3);
+  transition: all 0.2s ease;
+}
+
+.lens-badge-active:hover {
+  box-shadow: 0 0 12px oklch(0.6 0.18 250 / 0.4);
+}
+
+/* Thinking trace panel */
+.thinking-trace-panel {
+  border-left: 1px solid oklch(1 0 0 / 10%);
+  background: oklch(0.16 0.02 250);
+}
+
+:root .thinking-trace-panel {
+  background: oklch(0.98 0.005 250);
+  border-left-color: oklch(0.91 0.01 250);
+}
+
+/* Lens selector scroll area */
+.lens-selector-scroll {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 8px,
+    black calc(100% - 8px),
+    transparent
+  );
+}

@@ -3,8 +3,12 @@
 import { MessageSquare } from "lucide-react";
 import { useCallback, useState } from "react";
 
+import { CustomLensBuilder } from "@/components/lenses/custom-lens-builder";
+import { LensSelector } from "@/components/lenses/lens-selector";
+import { ThinkingTracePanel } from "@/components/lenses/thinking-trace-panel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useChat } from "@/hooks/use-chat";
+import { useLenses } from "@/hooks/use-lenses";
 
 import { ChatHeader } from "./chat-header";
 import { ChatInput } from "./chat-input";
@@ -26,7 +30,12 @@ export function ChatLayout() {
     deleteConversation,
   } = useChat();
 
+  const { allLenses, activeLensIds, activeLenses, composedPrompt, toggleLens, addCustomLens } =
+    useLenses(activeConversationId);
+
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isTraceOpen, setIsTraceOpen] = useState(false);
+  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
 
   const activeTitle = conversations.find((c) => c.id === activeConversationId)?.title ?? null;
 
@@ -37,6 +46,17 @@ export function ChatLayout() {
   const closeMobile = useCallback(() => {
     setIsMobileOpen(false);
   }, []);
+
+  const toggleTrace = useCallback(() => {
+    setIsTraceOpen((prev) => !prev);
+  }, []);
+
+  const handleSend = useCallback(
+    (content: string) => {
+      void sendMessage(content, activeLensIds);
+    },
+    [sendMessage, activeLensIds],
+  );
 
   const hasMessages = messages.length > 0 || isStreaming;
 
@@ -54,7 +74,13 @@ export function ChatLayout() {
       />
 
       <div className="chat-gradient-bg flex flex-1 flex-col">
-        <ChatHeader title={activeTitle} onToggleSidebar={toggleSidebar} />
+        <ChatHeader
+          title={activeTitle}
+          onToggleSidebar={toggleSidebar}
+          activeLensCount={activeLensIds.length}
+          onToggleTrace={toggleTrace}
+          isTraceOpen={isTraceOpen}
+        />
 
         {isLoadingMessages && activeConversationId ? (
           <div className="flex-1 overflow-y-auto">
@@ -95,8 +121,29 @@ export function ChatLayout() {
           </div>
         )}
 
-        <ChatInput onSend={sendMessage} disabled={isStreaming} />
+        <LensSelector
+          lenses={allLenses}
+          activeLensIds={activeLensIds}
+          onToggleLens={toggleLens}
+          onOpenBuilder={() => setIsBuilderOpen(true)}
+        />
+
+        <ChatInput onSend={handleSend} disabled={isStreaming} />
       </div>
+
+      <ThinkingTracePanel
+        isOpen={isTraceOpen}
+        onClose={() => setIsTraceOpen(false)}
+        activeLenses={activeLenses}
+        composedPrompt={composedPrompt}
+        onToggleLens={toggleLens}
+      />
+
+      <CustomLensBuilder
+        open={isBuilderOpen}
+        onOpenChange={setIsBuilderOpen}
+        onLensCreated={addCustomLens}
+      />
     </div>
   );
 }

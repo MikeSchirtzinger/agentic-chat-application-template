@@ -120,7 +120,7 @@ export function useChat() {
   }, [activeConversationId]);
 
   const sendMessage = useCallback(
-    async (content: string) => {
+    async (content: string, activeLensIds?: string[]) => {
       if (isStreaming || !content.trim()) {
         return;
       }
@@ -141,6 +141,7 @@ export function useChat() {
           body: JSON.stringify({
             content,
             conversationId: activeConversationId ?? undefined,
+            activeLensIds: activeLensIds ?? [],
           }),
           signal: abortController.signal,
         });

@@ -10,6 +10,7 @@ import {
   SendMessageSchema,
   streamChatCompletion,
 } from "@/features/chat";
+import { composeLensPrompt, resolveActiveLenses } from "@/features/lenses";
 
 const logger = getLogger("api.chat.send");
 
@@ -20,7 +21,11 @@ const logger = getLogger("api.chat.send");
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { content, conversationId: existingConversationId } = SendMessageSchema.parse(body);
+    const {
+      content,
+      conversationId: existingConversationId,
+      activeLensIds,
+    } = SendMessageSchema.parse(body);
 
     // Create conversation if needed
     let conversationId = existingConversationId;
@@ -37,8 +42,12 @@ export async function POST(request: NextRequest) {
     // Get history for context
     const history = await getMessages(conversationId);
 
-    // Stream completion
-    const { stream, fullResponse } = await streamChatCompletion(history);
+    // Resolve and compose lenses
+    const lenses = await resolveActiveLenses(activeLensIds);
+    const composedPrompt = composeLensPrompt(lenses);
+
+    // Stream completion with lens-modified prompt
+    const { stream, fullResponse } = await streamChatCompletion(history, undefined, composedPrompt);
 
     // Wrap the stream to save assistant message after completion
     const reader = stream.getReader();

@@ -85,3 +85,16 @@ export const chatMessages = pgTable(t("chat_messages"), {
   content: text("content").notNull(),
   ...timestamps,
 });
+
+/**
+ * Custom lenses table - stores user-created cognitive lenses.
+ */
+export const customLenses = pgTable(t("custom_lenses"), {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  prompt: text("prompt").notNull(),
+  icon: text("icon").notNull().default("Sparkles"),
+  originalInput: text("original_input").notNull(),
+  ...timestamps,
+});
