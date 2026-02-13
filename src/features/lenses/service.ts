@@ -135,10 +135,13 @@ export async function generateLens(
     throw new LensGenerationFailedError("Empty response from OpenRouter");
   }
 
+  // Strip markdown code fences if present (LLMs often wrap JSON in ```json ... ```)
+  const cleaned = content.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
+
   // Parse the JSON content
   let result: { name: string; description: string; prompt: string };
   try {
-    result = JSON.parse(content);
+    result = JSON.parse(cleaned);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     logger.error({ error: message, content }, "lenses.generate_json_parse_failed");
