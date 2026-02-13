@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { CustomLens, Lens } from "@/features/lenses/types";
 import { composeLensPrompt } from "@/features/lenses/compose";
 import { PRESET_LENS_MAP, PRESET_LENSES } from "@/features/lenses/constants";
+import type { CustomLens, Lens } from "@/features/lenses/types";
 
 export function useLenses(conversationId: string | null) {
   // activeLensIds persisted to localStorage keyed by conversationId

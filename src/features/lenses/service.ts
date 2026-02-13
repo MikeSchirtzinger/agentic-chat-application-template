@@ -136,7 +136,10 @@ export async function generateLens(
   }
 
   // Strip markdown code fences if present (LLMs often wrap JSON in ```json ... ```)
-  const cleaned = content.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
+  const cleaned = content
+    .replace(/^```(?:json)?\s*\n?/i, "")
+    .replace(/\n?```\s*$/i, "")
+    .trim();
 
   // Parse the JSON content
   let result: { name: string; description: string; prompt: string };

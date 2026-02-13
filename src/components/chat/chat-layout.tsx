@@ -1,7 +1,7 @@
 "use client";
 
 import { MessageSquare } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { CustomLensBuilder } from "@/components/lenses/custom-lens-builder";
 import { LensSelector } from "@/components/lenses/lens-selector";
@@ -10,10 +10,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useChat } from "@/hooks/use-chat";
 import { useLenses } from "@/hooks/use-lenses";
 
+import type { AppMode } from "./chat-header";
 import { ChatHeader } from "./chat-header";
 import { ChatInput } from "./chat-input";
 import { ChatSidebar } from "./chat-sidebar";
 import { MessageList } from "./message-list";
+
+function DebateModeWrapper() {
+  const { DebateLayout } = require("@/components/debate/debate-layout");
+  const { useDebate } = require("@/hooks/use-debate");
+  const debate = useDebate();
+
+  return <DebateLayout debate={debate} />;
+}
 
 export function ChatLayout() {
   const {
@@ -36,6 +45,19 @@ export function ChatLayout() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isTraceOpen, setIsTraceOpen] = useState(false);
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
+  const [mode, setMode] = useState<AppMode>("chat");
+
+  useEffect(() => {
+    const stored = localStorage.getItem("app-mode");
+    if (stored === "chat" || stored === "debate") {
+      setMode(stored);
+    }
+  }, []);
+
+  const handleModeChange = useCallback((newMode: AppMode) => {
+    setMode(newMode);
+    localStorage.setItem("app-mode", newMode);
+  }, []);
 
   const activeTitle = conversations.find((c) => c.id === activeConversationId)?.title ?? null;
 
@@ -60,6 +82,25 @@ export function ChatLayout() {
 
   const hasMessages = messages.length > 0 || isStreaming;
 
+  if (mode === "debate") {
+    return (
+      <div className="flex h-screen">
+        <div className="chat-gradient-bg flex flex-1 flex-col">
+          <ChatHeader
+            title={null}
+            onToggleSidebar={toggleSidebar}
+            activeLensCount={0}
+            onToggleTrace={toggleTrace}
+            isTraceOpen={false}
+            mode={mode}
+            onModeChange={handleModeChange}
+          />
+          <DebateModeWrapper />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen">
       <ChatSidebar
@@ -80,6 +121,8 @@ export function ChatLayout() {
           activeLensCount={activeLensIds.length}
           onToggleTrace={toggleTrace}
           isTraceOpen={isTraceOpen}
+          mode={mode}
+          onModeChange={handleModeChange}
         />
 
         {isLoadingMessages && activeConversationId ? (
